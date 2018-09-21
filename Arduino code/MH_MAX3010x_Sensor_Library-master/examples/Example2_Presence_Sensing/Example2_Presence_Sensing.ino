@@ -1,10 +1,11 @@
 /*
-  MAX30105 Breakout: Take readings from the FIFO
-  By: Bennu @ MH-ET LIVE
+  MAX30105 Breakout: Take IR reading to sense presence
+    By: Bennu @ MH-ET LIVE
   Date: October 2nd, 2017
   https://github.com/MHEtLive/MH-ET-LIVE-max30102
 
-  Outputs all Red/IR/Green values at 25Hz by polling the FIFO
+  This takes an average reading at power up and if the reading changes more than 100
+  then print 'Something is there!'.
 
   Hardware Connections (Breakoutboard to Arduino):
   -5V = 5V (3.3V is allowed)
@@ -12,11 +13,10 @@
   -SDA = A4 (or SDA)
   -SCL = A5 (or SCL)
   -INT = Not connected
- 
+
   The MAX30105 Breakout can handle 5V or 3.3V I2C logic. We recommend powering the board with 5V
   but it will also run at 3.3V.
 
-  This code is released under the [MIT License](http://opensource.org/licenses/MIT).
 */
 
 #include <Wire.h>
@@ -24,13 +24,14 @@
 
 MAX30105 particleSensor;
 
-long startTime;
 long samplesTaken = 0; //Counter for calculating the Hz or read rate
+long unblockedValue; //Average IR at power up
+long startTime; //Used to calculate measurement rate
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("Initializing...");
+  Serial.begin(9600);
+  Serial.println("MAX30105 Presence Sensing Example");
 
   // Initialize sensor
   if (particleSensor.begin(Wire, I2C_SPEED_FAST) == false) //Use default I2C port, 400kHz speed
@@ -48,31 +49,41 @@ void setup()
   int adcRange = 2048; //Options: 2048, 4096, 8192, 16384
 
   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange); //Configure sensor with these settings
-//  particleSensor.setup(); //Configure sensor. Use 6.4mA for LED drive
+
+  particleSensor.setPulseAmplitudeRed(0); //Turn off Red LED
+  particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
+
+  //Take an average of IR readings at power up
+  unblockedValue = 0;
+  for (byte x = 0 ; x < 32 ; x++)
+  {
+    unblockedValue += particleSensor.getIR(); //Read the IR value
+  }
+  unblockedValue /= 32;
 
   startTime = millis();
 }
 
 void loop()
 {
-  particleSensor.check(); //Check the sensor, read up to 3 samples
+  samplesTaken++;
 
-  while (particleSensor.available()) //do we have new data?
+  Serial.print("IR[");
+  Serial.print(particleSensor.getIR());
+  Serial.print("] Hz[");
+  Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
+  Serial.print("]");
+
+  long currentDelta = particleSensor.getIR() - unblockedValue;
+
+  Serial.print(" delta[");
+  Serial.print(currentDelta);
+  Serial.print("]");
+
+  if (currentDelta > (long)100)
   {
-    samplesTaken++;
-
-    Serial.print(" R[");
-    Serial.print(particleSensor.getFIFORed());
-    Serial.print("] IR[");
-    Serial.print(particleSensor.getFIFOIR());
-    Serial.print("] G[");
-    Serial.print(particleSensor.getFIFOGreen());
-    Serial.print("] Hz[");
-    Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
-    Serial.print("]");
-
-    Serial.println();
-
-    particleSensor.nextSample(); //We're finished with this sample so move to next sample
+    Serial.print(" Something is there!");
   }
+
+  Serial.println();
 }

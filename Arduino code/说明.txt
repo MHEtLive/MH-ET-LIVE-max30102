@@ -1,2 +1,3 @@
-1.SPO2文件夹中是测量血氧和心率的综合程序
-2.SparkFun_MAX3010x_Sensor_Library-master文件夹中一共有7个小程序，每个小程序实现一个简单功能，具体作用看工程名称。
+﻿1.SPO2文件夹中是测量血氧和心率的综合程序；
+2.MH_MAX3010x_Sensor_Library-master文件夹中一共有7个小程序，每个小程序实现一个简单功能，具体作用看工程名称。
+使用方法是将MH_MAX3010x_Sensor_Library-master文件夹放进arduino 安装目录的libraries文件夹里。然后在arduino的文件>>示例中打开例子，依次测试；

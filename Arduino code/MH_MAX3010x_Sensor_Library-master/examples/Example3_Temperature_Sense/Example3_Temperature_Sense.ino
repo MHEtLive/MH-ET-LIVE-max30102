@@ -1,8 +1,8 @@
 /*
   MAX3010 Breakout: Read the onboard temperature sensor
-  By: Nathan Seidle @ SparkFun Electronics
-  Date: October 20th, 2016
-  https://github.com/sparkfun/MAX30105_Breakout
+  By: Bennu @ MH-ET LIVE
+  Date: October 2nd, 2017
+  https://github.com/MHEtLive/MH-ET-LIVE-max30102
 
   This demo outputs the onboard temperature sensor. The temp sensor is accurate to +/-1 C but
   has an astonishing precision of 0.0625 C.
@@ -39,8 +39,8 @@ void setup()
 
   //The LEDs are very low power and won't affect the temp reading much but
   //you may want to turn off the LEDs to avoid any local heating
- // particleSensor.setup(0); //Configure sensor. Turn off LEDs
-  particleSensor.setup(); //Configure sensor. Use 25mA for LED drive
+  particleSensor.setup(0); //Configure sensor. Turn off LEDs
+  //particleSensor.setup(); //Configure sensor. Use 25mA for LED drive
 }
 
 void loop()
